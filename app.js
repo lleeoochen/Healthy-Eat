@@ -55,6 +55,7 @@ bot.dialog('/', [
     function (session, results) {
         weight = results.response;
         msg = "Okay, " + name + ". You weigh " + weight + ".";
+        session.send(msg);
         session.beginDialog('weightLoss');
     },
     function (session, results) {
