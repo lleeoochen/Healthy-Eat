@@ -39,16 +39,21 @@ bot.set('storage', tableStorage);
 var name, city;
 bot.dialog('/', [
     function (session) {
-        session.send("Welcome to Dog Predictor.");
-        builder.Prompts.text(session, "Whazure name?");
+        session.send("Welcome to Heathy Eat. ");
+        builder.Prompts.text(session, "What's your name?");
     },
     function (session, results) {
         name = results.response;
-        builder.Prompts.text(session, "We need more info, " + name + ". Where are you from?");
+        builder.Prompts.text(session, "We need more info, " + name + ". How tall are you?");
     },
     function (session, results) {
-        city = results.response;
-        var msg = "Okay, " + name + ". You are from " + city + ". Nobody cares.";
+        height = results.response;
+        var msg = "Okay, " + name + ". You are " + height + " tall. How much do you weigh?";
+        session.send(msg);
+    },
+    function (session, results) {
+        weight = results.response;
+        var msg = "Okay, " + name + ". You are " + height + " , and you weigh " + weight;
         session.send(msg);
     }
 ]);
