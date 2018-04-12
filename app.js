@@ -36,7 +36,7 @@ var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azu
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
-var name, city;
+var msg, weight, height, loseWeight, loss;
 bot.dialog('/', [
     function (session) {
         session.send("Welcome to Heathy Eat. ");
@@ -44,16 +44,37 @@ bot.dialog('/', [
     },
     function (session, results) {
         name = results.response;
-        builder.Prompts.text(session, "We need more info, " + name + ". How tall are you?");
+        msg = "We need more info, " + name + ". How tall are you?";
+        builder.Prompts.text(session, msg);
     },
     function (session, results) {
         height = results.response;
-        var msg = "Okay, " + name + ". You are " + height + " tall. How much do you weigh?";
-        session.send(msg);
+        msg = "Okay, " + name + ". You are " + height + " tall. How much do you weigh?";
+        builder.Prompts.text(session, msg);
     },
     function (session, results) {
         weight = results.response;
-        var msg = "Okay, " + name + ". You are " + height + " , and you weigh " + weight;
+        msg = "Okay, " + name + ". You weigh " + weight + ". Do you want to lose weight?";
+        builder.Prompts.text(session, msg);
+    },
+    function (session, results) {
+        loseWeight = results.response.toLowerCase().includes("y") || results.response.toLowerCase().includes("ok");
+        // session.beginDialog('byWeightLoss');
+        if (loseWeight) {
+            msg = "By how much?";
+            builder.Prompts.text(session, msg);
+        }
+        else {
+            builder.Prompts.text(session, "");
+        }
+    },
+    function (session, results) {
+
+        if ()
+        loss = parseInt(results.response);
+        weight -= loss;
+        msg = "Your target weight is now " + weight;
         session.send(msg);
     }
 ]);
+
