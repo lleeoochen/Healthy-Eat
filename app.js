@@ -119,11 +119,6 @@ bot.dialog('/', [
                         label = json.hints[0].food.label;
                         measureURI = json.hints[1].measures[0].uri;
                         foodURI = json.hints[0].food.uri;
-                        // console.log(text);
-                        // console.log(label);
-                        // console.log(measureURI);
-                        // console.log(foodURI);
-                        // session.send("You have matched with " + label);
                         session.send("Ok, you ate " + label);
                         session.beginDialog('calories');
                     }
@@ -139,25 +134,25 @@ bot.dialog('/', [
     },
     function (session, results) {
         if (fat > 78) {
-            session.send("You ate " + fat + " g fat today. It should be less than 78 g.");
+            session.send("You ate " + parseInt(fat) + "g fat today. It should be less than 78 g.");
         }
         if (chocdf > 325) {
-            session.send("You ate " + chocdf + " g carbs today. It should be less than 325 g.");
+            session.send("You ate " + parseInt(chocdf) + "g carbs today. It should be less than 325 g.");
         }
-        if (fibtg < (cal/1000*14) {
-            session.send("You ate " + fitbtg + " g fiber today. Suggest you to eat" + (cal/1000*14) + " g of fiber everyday.");
+        if (fibtg < (cal/1000*14)) {
+            session.send("You ate " + parseInt(fitbtg) + "g fiber today. Suggest you to eat" + (cal/1000*14) + " g of fiber everyday.");
         }
         if (genderFemale && sugar > 20) {
-            session.send("You shall eat no more than 20 g sugar.");
+            session.send("You shall eat no more than 20g sugar.");
         }
         if (!genderFemale && sugar > 36) {
-            session.send("You shall eat no more than 36 g sugar.");
+            session.send("You shall eat no more than 36g sugar.");
         }
         if (procnt < (parseInt(weight)*0.36)){
             session.send("You should eat more proteins.")
         }
         if (chole > 300) {
-            session.send("You ate " + chole + " mg cholesterol. Doctor usually suggests that you consume no more than 300 mg -- 200 mg if you had a high risk of heart disease.");
+            session.send("You ate " + parseInt(chole) + "mg cholesterol. Doctor usually suggests that you consume no more than 300 mg -- 200 mg if you had a high risk of heart disease.");
         }
         msg = name + ", how many steps you took today already?"
         builder.Prompts.text(session, msg);
