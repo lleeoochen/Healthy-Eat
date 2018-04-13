@@ -38,7 +38,7 @@ var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
 var food, searchAPIURL, ndbnoList = [];
-var msg, weight, height, steps, gender, genderFemale, loseWeight, loss = 0, calories = 0;
+var msg, weight, steps, gender, genderFemale, loseWeight, loss = 0, calories = 0, calNeeded = 0;
 var searchAPIURL1 = "https://api.nal.usda.gov/ndb/search/?format=json&q="
 var searchAPIURL2 = "&sort=n&max=25&offset=0&api_key=DEMO_KEY"
 
@@ -57,12 +57,7 @@ bot.dialog('/', [
         if (gender.toLowerCase().includes("female")){
             genderFemale = true;
         }
-        msg = "We need more info, " + name + ". How tall are you?";
-        builder.Prompts.text(session, msg);
-    },
-    function (session, results) {
-        height = results.response;
-        msg = "Okay, " + name + ". You are " + height + " tall. How much do you weigh in pounds?";
+        msg = "We need more info, " + name + ". How much do you weigh in pounds?";
         builder.Prompts.text(session, msg);
     },
     function (session, results) {
@@ -90,15 +85,16 @@ bot.dialog('/', [
     function (session, results) {
         food = results.response.split(" ");
         if (genderFemale){
-            calories = 2000;
+            calNeeded = 2000;
         } else {
-            calories = 2500;
+            calNeeded = 2500;
         }
         if (loss > 0) {
-            calories -= 500;
+            calNeeded -= 500;
         }
         var count = 0;
         msg = "stub";
+        calories = 3000;
         /*
         for (var i in food) {
             searchAPIURL = searchAPIURL1 + food[i] + searchAPIURL2;
@@ -123,12 +119,17 @@ bot.dialog('/', [
     },
     function (session, results) {
         steps = parseInt(results.response);
-        var calNeeded = calories - parseInt(weight)/3500.0 * steps;
-        var stepNeeded = parseInt(calNeeded * 3500.0 / parseInt(weight));
-        msg = "I think you need to exercise for " + stepNeeded + " steps more."
-        msg += "\nThen you will lose one pound per week and your weight after 5 weeks will be " + 
-                parseInt(weight)-5 ;
-        session.send(msg);
+        var extra_calories = calories - calNeeded - parseInt(weight)/3500.0 * steps;
+        //exercise if calNeeded is positive
+        if (extra_calories > 0) {
+            var stepNeeded = parseInt(calNeeded * 3500.0 / parseInt(weight));
+            msg = "I think you need to exercise for " + stepNeeded + " steps more.";
+            msg += "\nThen you will lose one pound per week, and your weight after 5 weeks will be " + (parseInt(weight) - 5) + " pounds.";
+        }
+        else {
+            msg = "I think you need " + parseInt(-extra_calories) + " calories more.";
+        }
+        session.send(msg); 
     }
 ]);
 
