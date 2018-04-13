@@ -181,6 +181,9 @@ bot.dialog('/', [
 
 bot.dialog('calories', [
     function (session,results) {
+
+        session.send("Calculating nutrient information...");
+
         // session.send("Calculating calories...");
         obj = {
             "yield": 1,
@@ -198,6 +201,20 @@ bot.dialog('calories', [
             method: "POST" })
             .then(res=>res.json())
             .then(json => {
+                cal = json.calories;
+                var nutrient;
+                var nutriLabel;
+                //console.log(cal);
+                session.send(label + ": " + "Calories: " + cal);
+                for (var nutrient in json.totalNutrients) {
+                    for (var property in json.totalNutrients[nutrient]) {
+                        console.log("Property: " + property);
+                        //console.log(json.totalNutrients[nutrient][property]);
+                        //console.log(json.totalNutrients[nutrient][property]);
+                        nutriLabel = json.totalNutrients[nutrient][property];
+                        session.send(property + ": " + nutriLabel);
+                    }
+                }
                 calories += json.calories;
                 // console.log(calories);
                 // session.send("Calories: " + calories);
