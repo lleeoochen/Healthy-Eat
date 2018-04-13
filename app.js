@@ -50,6 +50,8 @@ var foodURI;
 var obj;
 var requests;
 var cal=0, fat=0, chocdf=0, fibtg=0, sugar=0, procnt=0, chole=0;
+var messageConsume;
+var messageResult;
 
 bot.dialog('/', [
     function (session) {
@@ -105,6 +107,8 @@ bot.dialog('/', [
         calories = 0;
         requests = 0;
         msg = "";
+        messageConsume = "You consumed something like:\n\n";
+        messageResult = "Your nutriention results:\n\n";
 
         for (var index in food) {
             var encodeFood = encodeURI(food[index]);
@@ -119,12 +123,7 @@ bot.dialog('/', [
                         label = json.hints[0].food.label;
                         measureURI = json.hints[1].measures[0].uri;
                         foodURI = json.hints[0].food.uri;
-                        // console.log(text);
-                        // console.log(label);
-                        // console.log(measureURI);
-                        // console.log(foodURI);
-                        // session.send("You have matched with " + label);
-                        session.send("Ok, you ate " + label);
+                        messageConsume += "\t" + label + ".\n";
                         session.beginDialog('calories');
                     }
                     else {
@@ -139,27 +138,31 @@ bot.dialog('/', [
     },
     function (session, results) {
         if (fat > 78) {
-            session.send("You ate " + fat + " g fat today. It should be less than 78 g.");
+            messageResult += "You ate " + parseInt(fat) + "g fat today. It should be less than 78 g.\n";
         }
         if (chocdf > 325) {
-            session.send("You ate " + chocdf + " g carbs today. It should be less than 325 g.");
+            messageResult += "You ate " + parseInt(chocdf) + "g carbs today. It should be less than 325 g.\n";
         }
         if (fibtg < (cal/1000*14)) {
-            session.send("You ate " + fitbtg + " g fiber today. Suggest you to eat" + (cal/1000*14) + " g of fiber everyday.");
+            messageResult += "You ate " + parseInt(fitbtg) + "g fiber today. Suggest you to eat" + (cal/1000*14) + " g of fiber everyday.\n";
         }
         if (genderFemale && sugar > 20) {
-            session.send("You shall eat no more than 20 g sugar.");
+            messageResult += "You shall eat no more than 20g sugar.\n";
         }
         if (!genderFemale && sugar > 36) {
-            session.send("You shall eat no more than 36 g sugar.");
+            messageResult += "You shall eat no more than 36g sugar.\n";
         }
         if (procnt < (parseInt(weight)*0.36)){
-            session.send("You should eat more proteins.")
+            messageResult += "You should eat more proteins.\n";
         }
         if (chole > 300) {
-            session.send("You ate " + chole + " mg cholesterol. Doctor usually suggests that you consume no more than 300 mg -- 200 mg if you had a high risk of heart disease.");
+            messageResult += "You ate " + parseInt(chole) + "mg cholesterol. Doctor usually suggests that you consume no more than 300 mg -- 200 mg if you had a high risk of heart disease.\n";
         }
-        msg = name + ", how many steps you took today already?"
+
+        session.send(messageConsume);
+        session.send(messageResult);
+
+        msg = name + ", how many steps have you walked today?"
         builder.Prompts.text(session, msg);
     },
     function (session, results) {
@@ -168,8 +171,10 @@ bot.dialog('/', [
         //exercise if calNeeded is positive
         if (extra_calories > 0) {
             var stepNeeded = parseInt(calNeeded * 3500.0 / parseInt(weight));
-            msg = "I think you need to exercise for " + stepNeeded + " steps more.";
-            msg += "\nThen you will lose one pound per week, and your weight after 5 weeks will be " + (parseInt(weight) - 5) + " pounds.";
+            msg = "I think you need to walk " + stepNeeded + " steps more.";
+
+            if (loseWeight)
+                msg += "\nThen you will lose one pound per week, and your weight after 5 weeks will be " + (parseInt(weight) - 5) + " pounds.";
         }
         else {
             msg = "I think you need to eat " + parseInt(-extra_calories) + " calories more.";
@@ -182,7 +187,7 @@ bot.dialog('/', [
 bot.dialog('calories', [
     function (session,results) {
 
-        session.send("Calculating nutrient information...");
+        // session.send("Calculating nutrient information...");
 
         // session.send("Calculating calories...");
         obj = {
