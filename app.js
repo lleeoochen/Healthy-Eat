@@ -144,7 +144,7 @@ bot.dialog('/', [
         if (chocdf > 325) {
             session.send("You ate " + chocdf + " g carbs today. It should be less than 325 g.");
         }
-        if (fibtg < (cal/1000*14) {
+        if (fibtg < (cal/1000*14)) {
             session.send("You ate " + fitbtg + " g fiber today. Suggest you to eat" + (cal/1000*14) + " g of fiber everyday.");
         }
         if (genderFemale && sugar > 20) {
@@ -175,7 +175,7 @@ bot.dialog('/', [
             msg = "I think you need to eat " + parseInt(-extra_calories) + " calories more.";
         }
         session.send(msg);
-
+        session.endDialog();
     }
 ]);
 
@@ -205,27 +205,34 @@ bot.dialog('calories', [
                 var nutrient;
                 var nutriLabel;
                 //console.log(cal);
-                session.send(label + ": " + "Calories: " + cal);
-                for (var nutrient in json.totalNutrients) {
-                    for (var property in json.totalNutrients[nutrient]) {
-                        console.log("Property: " + property);
-                        //console.log(json.totalNutrients[nutrient][property]);
-                        //console.log(json.totalNutrients[nutrient][property]);
-                        nutriLabel = json.totalNutrients[nutrient][property];
-                        session.send(property + ": " + nutriLabel);
-                    }
-                }
+                // session.send(label + ": " + "Calories: " + cal);
+                // for (var nutrient in json.totalNutrients) {
+                //     for (var property in json.totalNutrients[nutrient]) {
+                //         console.log("Property: " + property);
+                //         //console.log(json.totalNutrients[nutrient][property]);
+                //         //console.log(json.totalNutrients[nutrient][property]);
+                //         nutriLabel = json.totalNutrients[nutrient][property];
+                //         session.send(property + ": " + nutriLabel);
+                //     }
+                // }
                 calories += json.calories;
                 // console.log(calories);
                 // session.send("Calories: " + calories);
 
-                fat += json.totalNutrients.FAT.quantity;
-                chocdf += json.totalNutrients.CHOCDF.quantity;
-                fibtg += json.totalNutrients.FIBTG.quantity;
-                sugar += json.totalNutrients.SUGAR.quantity;
-                procnt += json.totalNutrients.PROCNT.quantity;
-                chole += json.totalNutrients.CHOLE.quantity;
+                if (json.totalNutrients.FAT != undefined)
+                    fat += json.totalNutrients.FAT.quantity;
+                if (json.totalNutrients.CHOCDF != undefined)
+                    chocdf += json.totalNutrients.CHOCDF.quantity;
+                if (json.totalNutrients.FIBTG != undefined)
+                    fibtg += json.totalNutrients.FIBTG.quantity;
+                if (json.totalNutrients.SUGAR != undefined)
+                    sugar += json.totalNutrients.SUGAR.quantity;
+                if (json.totalNutrients.PROCNT != undefined)
+                    procnt += json.totalNutrients.PROCNT.quantity;
+                if (json.totalNutrients.CHOLE != undefined)
+                    chole += json.totalNutrients.CHOLE.quantity;
                 requests++;
+
                 if (requests == food.length)
                     session.endDialogWithResult(results);
             });
