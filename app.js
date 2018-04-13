@@ -37,6 +37,10 @@ var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
 var msg, weight, height, loseWeight, loss = 0;
+var food, searchAPIURL, ndbnoList;
+var searchAPIURL1 = "https://api.nal.usda.gov/ndb/search/?format=json&q="
+var searchAPIURL2 = "&sort=n&max=25&offset=0&api_key=DEMO_KEY"
+
 bot.dialog('/', [
     function (session) {
         session.send("Welcome to Heathy Eat. ");
@@ -68,6 +72,26 @@ bot.dialog('/', [
 
         weight -= loss;
         msg = "Your target weight is " + weight + ".";
+        session.send(msg);
+    },
+    function (session) {
+        var msg = name + ", can you tell me what you eat today?"
+        builder.Prompts.text(session, msg);
+    },
+    function (session, results) {
+        food = results.response.split(" ");
+        var msg;
+        for (var i in food){
+            searchAPIURL = searchAPIURL1 + food[i] + searchAPIURL2;
+            fetch(searchAPIURL)
+                .then(res => res.json())
+                .then(json => {
+                    var ndbno = jason.list.item.ndbno;
+                    ndbnoList.push(ndbno);
+                    msg += ndbno + " ";
+                }
+            );
+        }
         session.send(msg);
     }
 ]);
