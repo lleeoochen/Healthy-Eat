@@ -39,7 +39,7 @@ var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
 var food, searchAPIURL, ndbnoList = [];
-var msg, weight, height, steps, gender, genderFemale, loseWeight, loss = 0, calories = 0, calNeeded = 0;
+var msg, weight, steps, gender, genderFemale, loseWeight, loss = 0, calories = 0, calNeeded = 0;
 var searchAPIURL1 = "https://api.nal.usda.gov/ndb/search/?format=json&q="
 var searchAPIURL2 = "&sort=n&max=25&offset=0&api_key=DEMO_KEY"
 var text; // food text lookup result
@@ -49,6 +49,7 @@ var measureURI;
 var foodURI;   
 var obj;
 var requests;
+var cal=0, fat=0, chocdf=0, fibtg=0, sugar=0, procnt=0, chole=0;
 
 bot.dialog('/', [
     function (session) {
@@ -65,17 +66,12 @@ bot.dialog('/', [
         if (gender.toLowerCase().includes("female")){
             genderFemale = true;
         }
-        msg = "We need more info, " + name + ". How tall are you?";
-        builder.Prompts.text(session, msg);
-    },
-    function (session, results) {
-        height = results.response;
-        msg = "Okay, " + name + ". You are " + height + " tall. How much do you weigh in pounds?";
+        msg = "We need more info, " + name + ". How much do you weigh in pounds?";
         builder.Prompts.text(session, msg);
     },
     function (session, results) {
         weight = results.response;
-        msg = "Okay, " + name + ". You weigh " + weight + ".";
+        msg = "Okay, " + name + ". You weigh " + weight + " pounds.";
         session.send(msg);
         session.beginDialog('weightLoss');
     },
@@ -108,7 +104,7 @@ bot.dialog('/', [
 
         calories = 0;
         requests = 0;
-        msg = "stub";
+        msg = "";
 
         for (var index in food) {
             var encodeFood = encodeURI(food[index]);
@@ -142,6 +138,27 @@ bot.dialog('/', [
 
     },
     function (session, results) {
+        if (fat > 78) {
+            session.send("You ate " + fat + " g fat today. It should be less than 78 g.");
+        }
+        if (chocdf > 325) {
+            session.send("You ate " + chocdf + " g carbs today. It should be less than 325 g.");
+        }
+        if (fibtg < (cal/1000*14) {
+            session.send("You ate " + fitbtg + " g fiber today. Suggest you to eat" + (cal/1000*14) + " g of fiber everyday.");
+        }
+        if (genderFemale && sugar > 20) {
+            session.send("You shall eat no more than 20 g sugar.");
+        }
+        if (!genderFemale && sugar > 36) {
+            session.send("You shall eat no more than 36 g sugar.");
+        }
+        if (procnt < (parseInt(weight)*0.36)){
+            session.send("You should eat more proteins.")
+        }
+        if (chole > 300) {
+            session.send("You ate " + chole + " mg cholesterol. Doctor usually suggests that you consume no more than 300 mg -- 200 mg if you had a high risk of heart disease.");
+        }
         msg = name + ", how many steps you took today already?"
         builder.Prompts.text(session, msg);
     },
@@ -185,6 +202,12 @@ bot.dialog('calories', [
                 // console.log(calories);
                 // session.send("Calories: " + calories);
 
+                fat += json.totalNutrients.FAT.quantity;
+                chocdf += json.totalNutrients.CHOCDF.quantity;
+                fibtg += json.totalNutrients.FIBTG.quantity;
+                sugar += json.totalNutrients.SUGAR.quantity;
+                procnt += json.totalNutrients.PROCNT.quantity;
+                chole += json.totalNutrients.CHOLE.quantity;
                 requests++;
                 if (requests == food.length)
                     session.endDialogWithResult(results);
