@@ -5,6 +5,7 @@ A simple echo bot for the Microsoft Bot Framework.
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
+var fetch = require('node-fetch');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -74,26 +75,24 @@ bot.dialog('/', [
         weight -= loss;
         msg = "Your target weight is " + weight + ".";
         session.send(msg);
-    },
-    function (session) {
-        var msg = name + ", can you tell me what you eat today?"
+        
+        var msg = name + ", can you tell me what you eat today?";
         builder.Prompts.text(session, msg);
     },
     function (session, results) {
         food = results.response.split(" ");
-        var msg;
-        for (var i in food){
+        var msg = "";
+        for (var i in food) {
             searchAPIURL = searchAPIURL1 + food[i] + searchAPIURL2;
             fetch(searchAPIURL)
                 .then(res => res.json())
                 .then(json => {
-                    var ndbno = jason.list.item.ndbno;
-                    ndbnoList.push(ndbno);
-                    msg += ndbno + " ";
-                }
-            );
+                        var ndbno = json.list.item[0].ndbno;
+                        // ndbnoList.push(ndbno);
+                        msg += ndbno + " ";
+                        session.send(msg);
+                    });
         }
-        session.send(msg);
     }
 ]);
 
