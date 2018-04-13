@@ -46,7 +46,7 @@ var quantity; // IN PROGRESS: NLP quantity of food item
 var measureURI;
 var foodURI;   
 var obj;
-var cal;
+var cal, fat, chocdf, fibtg, sugar, procnt, chole;
 
 bot.dialog('/', [
     function (session) {
@@ -164,6 +164,35 @@ bot.dialog('calories', [
                 cal = json.calories;
                 console.log(cal);
                 session.send("Calories: " + cal); 
+
+                fat = json.totalNutrients.FAT.quantity;
+                if (fat > 78) {
+                    session.send("You ate " + fat + " g fat today. It should be less than 78 g.");
+                }
+                chocdf = json.totalNutrients.CHOCDF.quantity;
+                if (chocdf > 325) {
+                    session.send("You ate " + chocdf + " g carbs today. It should be less than 325 g.");
+                }
+                fibtg = json.totalNutrients.FIBTG.quantity;
+                if (fibtg < (cal/1000*14) {
+                    session.send("You ate " + fitbtg + " g fiber today. Suggest you to eat" + (cal/1000*14) + " g of fiber everyday.");
+                }
+                sugar = json.totalNutrients.SUGAR.quantity;
+                if (genderFemale && sugar > 20) {
+                    session.send("You shall eat no more than 20 g sugar.");
+                }
+                if (!genderFemale && sugar > 36) {
+                    session.send("You shall eat no more than 36 g sugar.");
+                }
+                procnt = json.totalNutrients.PROCNT.quantity;
+                if (procnt < (parseInt(weight)*0.36)){
+                    session.send("You should eat more proteins.")
+                }
+                chole = json.totalNutrients.CHOLE.quantity;
+                if (chole > 300) {
+                    session.send("You ate " + chole + " mg cholesterol. Doctor usually suggests that you consume no more than 300 mg -- 200 mg if you had a high risk of heart disease.");
+                }
+
             })
     }
 ]);
