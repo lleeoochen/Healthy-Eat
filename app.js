@@ -38,7 +38,7 @@ var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
 var food, searchAPIURL, ndbnoList = [];
-var msg, weight, height, steps, loseWeight, loss = 0, calories = 0;
+var msg, weight, height, steps, gender, genderFemale, loseWeight, loss = 0, calories = 0;
 var searchAPIURL1 = "https://api.nal.usda.gov/ndb/search/?format=json&q="
 var searchAPIURL2 = "&sort=n&max=25&offset=0&api_key=DEMO_KEY"
 
@@ -49,6 +49,14 @@ bot.dialog('/', [
     },
     function (session, results) {
         name = results.response;
+        msg = "We need more info, " + name + ". May I ask what's your gender? Male or female.";
+        builder.Prompts.text(session, msg);
+    },
+    function (session, results) {
+        gender = results.response;
+        if (gender.toLowerCase().includes("female")){
+            genderFemale = true;
+        }
         msg = "We need more info, " + name + ". How tall are you?";
         builder.Prompts.text(session, msg);
     },
@@ -81,7 +89,11 @@ bot.dialog('/', [
     },
     function (session, results) {
         food = results.response.split(" ");
-        calories = 45;
+        if (genderFemale){
+            calories = 2000;
+        } else {
+            calories = 2500;
+        }
         var count = 0;
         msg = "stub";
         /*
