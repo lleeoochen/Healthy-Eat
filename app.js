@@ -49,6 +49,7 @@ var measureURI;
 var foodURI;   
 var obj;
 var cal;
+var requests;
 
 bot.dialog('/', [
     function (session) {
@@ -102,10 +103,10 @@ bot.dialog('/', [
         } else {
             calories = 2500;
         }
-        var count = 0;
+        requests = 0;
         msg = "stub";
         for (var f in food) {
-            var encodeFood = encodeURI(food);
+            var encodeFood = encodeURI(f);
             console.log(encodeFood);
 
             
@@ -117,18 +118,19 @@ bot.dialog('/', [
                     measureURI = json.hints[1].measures[0].uri;
                     foodURI = json.hints[0].food.uri;
                     // console.log(text);
-                    console.log(label);
-                    console.log(measureURI);
-                    console.log(foodURI);
-                    session.send("You have matched with " + label);
-                    msg = label;
+                    // console.log(label);
+                    // console.log(measureURI);
+                    // console.log(foodURI);
+                    // session.send("You have matched with " + label);
+                    // session.send("Ok, you ate " + label);
                     session.beginDialog('calories');
-                    session.send("Ok, you ate " + msg);
-                    msg = name + ", how many steps you took today already?"
-                    builder.Prompts.text(session, msg);
                 })
         }
 
+    },
+    function (session, results) {
+        msg = name + ", how many steps you took today already?"
+        builder.Prompts.text(session, msg);
     },
     function (session, results) {
         steps = parseInt(results.response);
@@ -155,14 +157,20 @@ bot.dialog('calories', [
             headers: {
                 "Content-Type": "application/json"
             },
-            method: "POST"
-        })
+            method: "POST" })
             .then(res=>res.json())
             .then(json => {
                 cal = json.calories;
                 console.log(cal);
-                session.send("Calories: " + cal); 
-            })
+                session.send("Calories: " + cal);
+
+                requests++;
+                if (requests == food.length) {
+                    session.endDialogWithResult(results);
+                }
+
+            });
+
     }
 ]);
 
