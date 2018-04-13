@@ -38,7 +38,7 @@ var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
 var msg, weight, height, loseWeight, loss = 0;
-var food, searchAPIURL, ndbnoList;
+var food, searchAPIURL, ndbnoList = [];
 var searchAPIURL1 = "https://api.nal.usda.gov/ndb/search/?format=json&q="
 var searchAPIURL2 = "&sort=n&max=25&offset=0&api_key=DEMO_KEY"
 
@@ -82,17 +82,24 @@ bot.dialog('/', [
     function (session, results) {
         food = results.response.split(" ");
         var msg = "";
+        var count = 0;
         for (var i in food) {
             searchAPIURL = searchAPIURL1 + food[i] + searchAPIURL2;
             fetch(searchAPIURL)
                 .then(res => res.json())
                 .then(json => {
                         var ndbno = json.list.item[0].ndbno;
-                        // ndbnoList.push(ndbno);
+                        ndbnoList.push(ndbno);
                         msg += ndbno + " ";
-                        session.send(msg);
+                        console.log(msg);
+                        count ++;
+                        if (count == food.length) {
+                            console.log("Final: " + msg);
+                            session.send(msg);
+                        }
                     });
         }
+
     }
 ]);
 
