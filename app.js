@@ -5,6 +5,7 @@ A simple echo bot for the Microsoft Bot Framework.
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
+var request = require('request');
 var fetch = require('node-fetch');
 
 // Setup Restify Server
@@ -41,6 +42,13 @@ var food, searchAPIURL, ndbnoList = [];
 var msg, weight, height, steps, gender, genderFemale, loseWeight, loss = 0, calories = 0;
 var searchAPIURL1 = "https://api.nal.usda.gov/ndb/search/?format=json&q="
 var searchAPIURL2 = "&sort=n&max=25&offset=0&api_key=DEMO_KEY"
+var text; // food text lookup result
+var label; // food lookup result description
+var quantity; // IN PROGRESS: NLP quantity of food item
+var measureURI;
+var foodURI;   
+var obj;
+var cal;
 
 bot.dialog('/', [
     function (session) {
@@ -88,7 +96,7 @@ bot.dialog('/', [
         builder.Prompts.text(session, msg);
     },
     function (session, results) {
-        food = results.response.split(" ");
+        food = results.response.split(" and ");
         if (genderFemale){
             calories = 2000;
         } else {
@@ -96,6 +104,27 @@ bot.dialog('/', [
         }
         var count = 0;
         msg = "stub";
+        for (var f in food) {
+            var encodeFood = encodeURI(food);
+            console.log(encodeFood);
+
+            
+            fetch("https://api.edamam.com/api/food-database/parser?ingr=" + encodeFood + "&app_id=b748a952&app_key=cc939ba207e01222b0737319798f84e6&page=0")
+                .then(res=>results.json())
+                .then(json => {
+                    text = json.text;
+                    label = json.hints[0].food.label;
+                    measureURI = json.hints[1].measures[0].uri;
+                    foodURI = json.hints[0].food.uri;
+                    // console.log(text);
+                    console.log(label);
+                    console.log(measureURI);
+                    console.log(foodURI);
+                    session.send("You have matched with " + label);
+                    msg = label;
+                    session.beginDialog('calories');
+                })
+        }
         /*
         for (var i in food) {
             searchAPIURL = searchAPIURL1 + food[i] + searchAPIURL2;
@@ -127,6 +156,32 @@ bot.dialog('/', [
     }
 ]);
 
+bot.dialog('calories', [
+    function (session,results) {
+        session.send("Calculating calories...");
+        obj = {
+            "yield": 1,
+            "ingredients": [{
+                "quantity": 1,
+                "measureURI": measureURI,
+                "foodURI": foodURI
+            }]
+        }
+        fetch("https://api.edamam.com/api/food-database/nutrients?app_id=b748a952&app_key=cc939ba207e01222b0737319798f84e6", {
+            body: JSON.stringify(obj),
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: "POST"
+        })
+            .then(res=>res.json())
+            .then(json => {
+                cal = json.calories;
+                console.log(cal);
+                session.send("Calories: " + cal); 
+            })
+    }
+]);
 
 bot.dialog('weightLoss', [
     function (session) {
