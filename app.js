@@ -38,10 +38,8 @@ var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azu
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
-var food, searchAPIURL, ndbnoList = [];
+var food, searchAPIURL;
 var msg, weight, steps, gender, genderFemale, loseWeight, loss = 0, calories = 0, calNeeded = 0;
-var searchAPIURL1 = "https://api.nal.usda.gov/ndb/search/?format=json&q="
-var searchAPIURL2 = "&sort=n&max=25&offset=0&api_key=DEMO_KEY"
 var text; // food text lookup result
 var label; // food lookup result description
 var quantity; // IN PROGRESS: NLP quantity of food item
