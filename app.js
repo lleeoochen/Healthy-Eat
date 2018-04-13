@@ -108,7 +108,7 @@ bot.dialog('/', [
         requests = 0;
         msg = "";
         messageConsume = "You consumed something like:\n\n";
-        messageResult = "Your nutriention results:\n\n";
+        messageResult = "Your nutrition results:\n\n";
 
         for (var index in food) {
             var encodeFood = encodeURI(food[index]);
