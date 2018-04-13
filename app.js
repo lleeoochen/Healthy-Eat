@@ -37,7 +37,7 @@ var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azu
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
-var msg, weight, height, loseWeight, loss = 0;
+var msg, weight, height, steps, loseWeight, loss = 0;
 var food, searchAPIURL, ndbnoList;
 var searchAPIURL1 = "https://api.nal.usda.gov/ndb/search/?format=json&q="
 var searchAPIURL2 = "&sort=n&max=25&offset=0&api_key=DEMO_KEY"
@@ -54,7 +54,7 @@ bot.dialog('/', [
     },
     function (session, results) {
         height = results.response;
-        msg = "Okay, " + name + ". You are " + height + " tall. How much do you weigh?";
+        msg = "Okay, " + name + ". You are " + height + " tall. How much do you weigh in pounds?";
         builder.Prompts.text(session, msg);
     },
     function (session, results) {
@@ -76,12 +76,13 @@ bot.dialog('/', [
         msg = "Your target weight is " + weight + ".";
         session.send(msg);
         
-        var msg = name + ", can you tell me what you eat today?";
+        msg = name + ", can you tell me what you eat today?";
         builder.Prompts.text(session, msg);
     },
     function (session, results) {
         food = results.response.split(" ");
-        var msg = "";
+        msg = "stub";
+        /*
         for (var i in food) {
             searchAPIURL = searchAPIURL1 + food[i] + searchAPIURL2;
             fetch(searchAPIURL)
@@ -90,9 +91,18 @@ bot.dialog('/', [
                         var ndbno = json.list.item[0].ndbno;
                         // ndbnoList.push(ndbno);
                         msg += ndbno + " ";
-                        session.send(msg);
                     });
         }
+        */
+        session.send("Ok, you ate" + msg);
+        msg = name + ", how many steps you took today?"
+        builder.Prompts.text(session, msg);
+    },
+    function (session, results) {
+        steps = parseInt(results.response);
+        var calNeeded = weight/3500 * steps;
+        msg = "I think you need to exercise for " + calNeeded + " calories more."
+        session.send(msg);
     }
 ]);
 
