@@ -5,6 +5,8 @@ A simple echo bot for the Microsoft Bot Framework.
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
+var request = require('request');
+var fetch = require('node-fetch');
 
 // Setup Restify Server
 var server = restify.createServer();
