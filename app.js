@@ -123,7 +123,7 @@ bot.dialog('/', [
                         label = json.hints[0].food.label;
                         measureURI = json.hints[1].measures[0].uri;
                         foodURI = json.hints[0].food.uri;
-                        messageConsume += "\t" + label + ".\n";
+                        messageConsume += label + ".\n";
                         session.beginDialog('calories');
                     }
                     else {
@@ -159,10 +159,13 @@ bot.dialog('/', [
             messageResult += "You ate " + parseInt(chole) + "mg cholesterol. Doctor usually suggests that you consume no more than 300 mg -- 200 mg if you had a high risk of heart disease.\n";
         }
 
-        session.send(messageConsume);
-        session.send(messageResult);
-
-        msg = name + ", how many steps have you walked today?"
+        builder.Prompts.text(session, messageConsume + "\n\n Please confirm.");
+    },
+    function (session, result) {  
+        builder.Prompts.text(session, messageResult + "\n\n Please confirm.");
+    },
+    function (session, result) {
+        msg = name + ", how many steps have you walked today?";
         builder.Prompts.text(session, msg);
     },
     function (session, results) {
