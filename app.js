@@ -94,6 +94,9 @@ bot.dialog('/', [
         } else {
             calories = 2500;
         }
+        if (loss > 0) {
+            calories -= 500;
+        }
         var count = 0;
         msg = "stub";
         /*
@@ -114,7 +117,7 @@ bot.dialog('/', [
                     });
         }
         */
-        session.send("Ok, you ate" + msg);
+        session.send("Ok, you ate " + msg);
         msg = name + ", how many steps you took today already?"
         builder.Prompts.text(session, msg);
     },
@@ -123,6 +126,8 @@ bot.dialog('/', [
         var calNeeded = calories - parseInt(weight)/3500.0 * steps;
         var stepNeeded = parseInt(calNeeded * 3500.0 / parseInt(weight));
         msg = "I think you need to exercise for " + stepNeeded + " steps more."
+        msg += "\nThen you will lose one pound per week and your weight after 5 weeks will be " + 
+                parseInt(weight)-5 ;
         session.send(msg);
     }
 ]);
@@ -132,7 +137,6 @@ bot.dialog('weightLoss', [
     function (session) {
         msg = 'Do you want to lose weight?';
         builder.Prompts.text(session, msg);
-
     },
     function (session, results) {
         loseWeight = results.response.toLowerCase().includes("y") || results.response.toLowerCase().includes("ok");
