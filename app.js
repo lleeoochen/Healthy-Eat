@@ -110,7 +110,7 @@ bot.dialog('/', [
 
             
             fetch("https://api.edamam.com/api/food-database/parser?ingr=" + encodeFood + "&app_id=b748a952&app_key=cc939ba207e01222b0737319798f84e6&page=0")
-                .then(res=>results.json())
+                .then(res=>res.json())
                 .then(json => {
                     text = json.text;
                     label = json.hints[0].food.label;
@@ -123,29 +123,12 @@ bot.dialog('/', [
                     session.send("You have matched with " + label);
                     msg = label;
                     session.beginDialog('calories');
+                    session.send("Ok, you ate " + msg);
+                    msg = name + ", how many steps you took today already?"
+                    builder.Prompts.text(session, msg);
                 })
         }
-        /*
-        for (var i in food) {
-            searchAPIURL = searchAPIURL1 + food[i] + searchAPIURL2;
-            fetch(searchAPIURL)
-                .then(res => res.json())
-                .then(json => {
-                        var ndbno = json.list.item[0].ndbno;
-                        ndbnoList.push(ndbno);
-                        msg += ndbno + " ";
-                        console.log(msg);
-                        count ++;
-                        if (count == food.length) {
-                            console.log("Final: " + msg);
-                            session.send(msg);
-                        }
-                    });
-        }
-        */
-        session.send("Ok, you ate" + msg);
-        msg = name + ", how many steps you took today already?"
-        builder.Prompts.text(session, msg);
+
     },
     function (session, results) {
         steps = parseInt(results.response);
