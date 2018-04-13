@@ -39,7 +39,7 @@ var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
 var food, searchAPIURL, ndbnoList = [];
-var msg, weight, height, steps, gender, genderFemale, loseWeight, loss = 0, calories = 0;
+var msg, weight, height, steps, gender, genderFemale, loseWeight, loss = 0, calories = 0, calNeeded = 0;
 var searchAPIURL1 = "https://api.nal.usda.gov/ndb/search/?format=json&q="
 var searchAPIURL2 = "&sort=n&max=25&offset=0&api_key=DEMO_KEY"
 var text; // food text lookup result
@@ -48,7 +48,6 @@ var quantity; // IN PROGRESS: NLP quantity of food item
 var measureURI;
 var foodURI;   
 var obj;
-var cal;
 var requests;
 
 bot.dialog('/', [
@@ -98,32 +97,46 @@ bot.dialog('/', [
     },
     function (session, results) {
         food = results.response.split(" and ");
-        if (genderFemale){
-            calories = 2000;
-        } else {
-            calories = 2500;
-        }
+        
+        if (genderFemale)
+            calNeeded = 2000;
+        else
+            calNeeded = 2500;
+
+        if (loss > 0)
+            calNeeded -= 500;
+
+        calories = 0;
         requests = 0;
         msg = "stub";
-        for (var f in food) {
-            var encodeFood = encodeURI(f);
+
+        for (var index in food) {
+            var encodeFood = encodeURI(food[index]);
             console.log(encodeFood);
 
-            
             fetch("https://api.edamam.com/api/food-database/parser?ingr=" + encodeFood + "&app_id=b748a952&app_key=cc939ba207e01222b0737319798f84e6&page=0")
                 .then(res=>res.json())
                 .then(json => {
                     text = json.text;
-                    label = json.hints[0].food.label;
-                    measureURI = json.hints[1].measures[0].uri;
-                    foodURI = json.hints[0].food.uri;
-                    // console.log(text);
-                    // console.log(label);
-                    // console.log(measureURI);
-                    // console.log(foodURI);
-                    // session.send("You have matched with " + label);
-                    // session.send("Ok, you ate " + label);
-                    session.beginDialog('calories');
+
+                    if (json.hints[0] != undefined) {
+                        label = json.hints[0].food.label;
+                        measureURI = json.hints[1].measures[0].uri;
+                        foodURI = json.hints[0].food.uri;
+                        // console.log(text);
+                        // console.log(label);
+                        // console.log(measureURI);
+                        // console.log(foodURI);
+                        // session.send("You have matched with " + label);
+                        session.send("Ok, you ate " + label);
+                        session.beginDialog('calories');
+                    }
+                    else {
+                        requests++;
+                    }
+                    
+                    if (requests == food.length)
+                        session.beginDialog('none');
                 })
         }
 
@@ -134,16 +147,24 @@ bot.dialog('/', [
     },
     function (session, results) {
         steps = parseInt(results.response);
-        var calNeeded = calories - parseInt(weight)/3500.0 * steps;
-        var stepNeeded = parseInt(calNeeded * 3500.0 / parseInt(weight));
-        msg = "I think you need to exercise for " + stepNeeded + " steps more."
+        var extra_calories = calories - calNeeded - parseInt(weight)/3500.0 * steps;
+        //exercise if calNeeded is positive
+        if (extra_calories > 0) {
+            var stepNeeded = parseInt(calNeeded * 3500.0 / parseInt(weight));
+            msg = "I think you need to exercise for " + stepNeeded + " steps more.";
+            msg += "\nThen you will lose one pound per week, and your weight after 5 weeks will be " + (parseInt(weight) - 5) + " pounds.";
+        }
+        else {
+            msg = "I think you need to eat " + parseInt(-extra_calories) + " calories more.";
+        }
         session.send(msg);
+
     }
 ]);
 
 bot.dialog('calories', [
     function (session,results) {
-        session.send("Calculating calories...");
+        // session.send("Calculating calories...");
         obj = {
             "yield": 1,
             "ingredients": [{
@@ -160,15 +181,13 @@ bot.dialog('calories', [
             method: "POST" })
             .then(res=>res.json())
             .then(json => {
-                cal = json.calories;
-                console.log(cal);
-                session.send("Calories: " + cal);
+                calories += json.calories;
+                // console.log(calories);
+                // session.send("Calories: " + calories);
 
                 requests++;
-                if (requests == food.length) {
+                if (requests == food.length)
                     session.endDialogWithResult(results);
-                }
-
             });
 
     }
@@ -192,6 +211,12 @@ bot.dialog('weightLoss', [
             session.endDialogWithResult(results);
         }
     },
+    function (session, results) {
+        session.endDialogWithResult(results);
+    }
+]);
+
+bot.dialog('none', [
     function (session, results) {
         session.endDialogWithResult(results);
     }
